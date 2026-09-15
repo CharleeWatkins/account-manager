@@ -1,0 +1,199 @@
+//Problem Statement
+Imagine a system that manages bank accounts for users like Alice and Bob.
+Its job is to process money movements—like putting money in, 
+taking money out, or sending money to someone else—while automatically blocking suspicious activity or fraud.
+
+Here are the basic rules:
+Not Enough Money: You cannot take out or transfer more money than you actually have in your account.
+
+Too Fast (Rapid Withdrawals): If someone tries to take money out of an account more than 3 times in 10 seconds, 
+the system assumes it might be a hacker or a bot and blocks it.
+
+Unusual Spending Spikes: The system remembers your average transaction size. If you suddenly try to move an
+amount that is 5 times larger than your normal average, the system flags it as suspicious and blocks the transaction.
+
+
+// CHECK TRANSACTION RULES
+START
+1. Receive: Account, Amount, Transaction_Type, Current_Timestamp
+2. Check if the account has enough money.
+   IF Amount > Account.Balance THEN
+       RETURN "FAIL: Insufficient funds"
+   END IF
+
+3. Check the rapid withdrawal rule.
+   IF Transaction_Type = "WITHDRAWAL" THEN
+
+       Count the number of successful withdrawals
+       made by this account in the last 10 seconds.
+
+       IF Count >= 3 THEN
+           RETURN "FAIL: Too many withdrawals in 10 seconds"
+       END IF
+   END IF
+
+4. Check the unusual spending rule.
+   IF the account has previous outgoing transactions THEN
+       Calculate the average transaction amount:
+       Average_Transaction_Size =
+       Total_Outgoing_Transaction_Amount
+       / Total_Outgoing_Transactions
+
+       Calculate:
+       Spike_Threshold = 5 × Average_Transaction_Size
+
+       IF Amount > Spike_Threshold THEN
+           RETURN "FAIL: Transaction amount is too large"
+       END IF
+
+   END IF
+
+5. If none of the rules blocked the transaction:
+   RETURN "PASS"
+END
+
+
+// UPDATE ACCOUNT INFORMATION
+START
+1. Receive:Account, Amount, Transaction_Type, Current_Timestamp
+2. IF Transaction_Type = "WITHDRAWAL" THEN
+       Add the withdrawal to Withdrawal_Log.
+   END IF
+
+3. Add the transaction to the account's
+   Outgoing_Transaction_History.
+
+4. Increase Total_Outgoing_Transactions by 1.
+
+5. Add Amount to Total_Outgoing_Transaction_Amount.
+
+6. Calculate the new average:
+   Average_Transaction_Size =
+   Total_Outgoing_Transaction_Amount
+   / Total_Outgoing_Transactions
+
+7. Save the new average.
+END
+
+
+// DEPOSIT
+START
+1. Find the user's Account.
+2. Receive Deposit_Amount.
+3. Check that the deposit is greater than 0.
+   IF Deposit_Amount <= 0 THEN
+       Display "FAIL: Deposit amount must be greater than 0"
+       STOP
+   END IF
+
+4. Add Deposit_Amount to Account.Balance.
+5. Update the account information.
+6. Record the successful deposit.
+7. Display the new Account.Balance.
+END
+
+
+// WITHDRAWAL
+START
+1. Find the user's Account.
+2. Receive Withdrawal_Amount.
+3. Receive Current_Timestamp.
+4. Check that the withdrawal amount is greater than 0.
+
+   IF Withdrawal_Amount <= 0 THEN
+       Display "FAIL: Withdrawal amount must be greater than 0"
+       STOP
+   END IF
+
+5. Call CHECK TRANSACTION RULES with:
+       Account
+       Withdrawal_Amount
+       "WITHDRAWAL"
+       Current_Timestamp
+
+6. Store the result in Rule_Result.
+7. IF Rule_Result is not "PASS" THEN
+       Record the blocked withdrawal.
+       Display Rule_Result.
+
+       STOP
+   END IF
+
+8. Subtract Withdrawal_Amount from Account.Balance.
+9. Update the account information using:
+       Account
+       Withdrawal_Amount
+       "WITHDRAWAL"
+       Current_Timestamp
+
+10. Record the successful withdrawal.
+11. Display "Withdrawal successful."
+12. Display the new Account.Balance.
+END
+
+
+// TRANSFER
+START
+1. Find the Sender_Account.
+2. Find the Recipient_Account.
+3. Check that the Sender_Account exists.
+   IF Sender_Account does not exist THEN
+       Display "FAIL: Sender account not found"
+       STOP
+   END IF
+
+4. Check that the Recipient_Account exists.
+   IF Recipient_Account does not exist THEN
+       Display "FAIL: Recipient account not found"
+       STOP
+   END IF
+
+5. Check that the sender and recipient
+   are not the same account.
+
+   IF Sender_Account = Recipient_Account THEN
+       Display "FAIL: Cannot transfer to the same account"
+       STOP
+   END IF
+
+6. Receive Transfer_Amount.
+7. Receive Current_Timestamp.
+8. Check that the transfer amount is greater than 0.
+   IF Transfer_Amount <= 0 THEN
+       Display "FAIL: Transfer amount must be greater than 0"
+       STOP
+   END IF
+
+9. Call CHECK TRANSACTION RULES with:
+       Sender_Account
+       Transfer_Amount
+       "TRANSFER"
+       Current_Timestamp
+
+10. Store the result in Rule_Result.
+11. IF Rule_Result is not "PASS" THEN
+       Record the blocked transfer.
+       Display Rule_Result.
+
+       STOP
+   END IF
+
+12. Subtract Transfer_Amount
+    from Sender_Account.Balance.
+
+13. Add Transfer_Amount
+    to Recipient_Account.Balance.
+
+14. Update the Sender_Account information using:
+       Sender_Account
+       Transfer_Amount
+       "TRANSFER"
+       Current_Timestamp
+
+15. Update the Recipient_Account balance.
+16. Record the successful transfer.
+17. Display "Transfer successful."
+18. Display the new Sender_Account.Balance.
+
+END
+
