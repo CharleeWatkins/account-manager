@@ -1,0 +1,97 @@
+//Problem Statement
+Imagine a system that manages bank accounts for users like Alice and Bob.
+Its job is to process money movements—like putting money in, 
+taking money out, or sending money to someone else—while automatically blocking suspicious activity or fraud.
+
+Here are the basic rules:
+Not Enough Money: You cannot take out or transfer more money than you actually have in your account.
+
+Too Fast (Rapid Withdrawals): If someone tries to take money out of an account more than 3 times in 10 seconds, 
+the system assumes it might be a hacker or a bot and blocks it.
+
+Unusual Spending Spikes: The system remembers your average transaction size. If you suddenly try to move an
+amount that is 5 times larger than your normal average, the system flags it as suspicious and blocks the transaction.
+
+
+Check Transaction Rules
+1. Receive Account, Amount, Transaction_Type, Current_Timestamp.
+2. Check sufficient funds.
+        If Amount > Account.Balance:
+            Return "FAIL: Insufficient funds".
+3. Check rapid outgoing transaction rule.
+        If Transaction_Type is "WITHDRAWAL" or "TRANSFER":
+            Count successful outgoing transactions in the last 10 seconds.
+            If Count >= 3:
+                Return "FAIL: Too many transactions in 10 seconds".
+4. Check unusual spending spike rule.
+        If Account.Total_Outgoing_Transactions > 0:
+        Calculate Average = Total_Outgoing_Amount / Total_Outgoing_Transactions.
+            Calculate Max_allowed_amount = 5 × Average.
+            If Amount > Max_allowed_amount:
+                Return "FAIL: Transaction amount is too large".
+5. If no rule blocked:
+        Return "PASS".
+
+
+Update Account Information
+1. Receive Account, Amount, Transaction_Type, Current_Timestamp.
+2. If Transaction_Type is neither "WITHDRAWAL" nor "TRANSFER":
+            Stop (do not update outgoing stats).
+3. Add {Amount, Transaction_Type, Current_Timestamp}
+        to Account.Outgoing_Transaction_History.
+4. Increase Account.Total_Outgoing_Transactions by 1.
+5. Add Amount to Account.Total_Outgoing_Transaction_Amount.
+6. Recalulate Account.Average_Transaction_Size.
+
+//Deposit
+1. Find Account by User_ID.
+2. If Account does not exist:
+            Display "FAIL: Account not found". Stop.
+3. Receive Deposit_Amount.
+4. If Deposit_Amount <= 0:
+            Display "FAIL: Deposit amount must be greater than 0". Stop.
+5. Add Deposit_Amount to Account.Balance.
+6. Record the successful deposit.
+7. Display "Deposit successful" and new Account.Balance.
+
+//Withdrawal
+1. Find Account by User_ID.
+2. If Account does not exist:
+            Display "FAIL: Account not found". Stop.
+3. Receive Withdrawal_Amount and Current_Timestamp.
+4. If Withdrawal_Amount <= 0:
+            Display "FAIL: Withdrawal amount must be greater than 0". Stop.
+5. Call Check Transaction Rules with
+        Account, Withdrawal_Amount, "WITHDRAWAL", Current_Timestamp.
+6. If result is not "PASS":
+            Record the blocked attempt. Display result. Stop.
+7. Subtract Withdrawal_Amount from Account.Balance.
+8. Call Update Account Information with
+        Account, Withdrawal_Amount, "WITHDRAWAL", Current_Timestamp.
+9. Record the successful withdrawal.
+10. Display "Withdrawal successful" and new Account.Balance.
+
+//Transfer
+1. Find Sender_Account by Sender_ID.
+2. Find Recipient_Account by Recipient_ID.
+3. If Sender_Account does not exist:
+            Display "FAIL: Sender account not found". Stop.
+4. If Recipient_Account does not exist:
+            Display "FAIL: Recipient account not found". Stop.
+5. If Sender_ID equals Recipient_ID:
+            Display "FAIL: Cannot transfer to the same account". Stop.
+6. Receive Transfer_Amount and Current_Timestamp.
+7. If Transfer_Amount <= 0:
+            Display "FAIL: Transfer amount must be greater than 0". Stop.
+8. Call Check Transaction Rules with
+        Sender_Account, Transfer_Amount, "TRANSFER", Current_Timestamp.
+9. If result is not "PASS":
+            Record the blocked attempt. Display result. Stop.
+10. Subtract Transfer_Amount from Sender_Account.Balance.
+11. Add Transfer_Amount to Recipient_Account.Balance.
+12. Call Update Account Information with
+         Sender_Account, Transfer_Amount, "TRANSFER", Current_Timestamp.
+13. Record the successful transfer.
+14. Display "Transfer successful" and new Sender_Account.Balance.
+
+
