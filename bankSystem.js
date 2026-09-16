@@ -68,7 +68,7 @@ class BankSystem {
         return "PASS";
     }
 
-    // UPDATING THE ACCOUNT INFORMATION
+    // UPDATING THE ACCOUNT'S INFORMATION
     updateAccountInformation(account, amount, transactionType, currentTimestamp) {
         if (transactionType !== "WITHDRAWAL" && transactionType !== "TRANSFER") {
             return;
